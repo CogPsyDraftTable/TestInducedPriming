@@ -1,0 +1,96 @@
+body{
+height:100%;
+background-color:Beige ; 
+}
+
+#section1
+{width:700px;
+margin: 0 auto;
+text-align:center; 
+}
+
+#FirstInstr{
+padding:1in; 
+font-size: 20pt;
+text-align:center; 
+color:black; 
+font-family: Times New Roman; 
+}   
+
+
+#TestInst{
+padding:1in; 
+font-size: 20pt;
+text-align:center; 
+color:black; 
+font-family: Times New Roman; 
+} 
+
+#StrEnc{
+padding:0in; 
+font-size: 20pt;
+text-align:center; 
+color:black; 
+font-family: Times New Roman; 
+} 
+
+
+#WordStim{
+padding:1in; 
+font-size: 50pt;
+text-align:center; 
+color:black; 
+font-family: Times New Roman; 
+background-color:white; 
+}  
+
+#StrTst{
+padding:0in; 
+font-size: 20pt;
+text-align:center; 
+color:black; 
+font-family: Times New Roman; 
+}
+
+
+#sureold{
+padding:0in; 
+font-size: 15pt;
+text-align: center; 
+color:black; 
+font-family: Times New Roman; 
+}  
+#surenew{
+padding:0in; 
+font-size: 15pt;
+text-align: center; 
+color:black; 
+font-family: Times New Roman; 
+}  
+
+
+
+#probablynew{
+padding:0in; 
+font-size: 15pt;
+text-align: center; 
+color:black; 
+font-family: Times New Roman; 
+}  
+
+#probablyold{
+padding:0in; 
+font-size: 15pt;
+text-align: center; 
+color:black; 
+font-family: Times New Roman; 
+}  
+
+
+#Ending{
+padding:2in; 
+font-size: 20pt;
+text-align:center; 
+color:black; 
+font-family: Times New Roman; 
+} 

@@ -1,0 +1,426 @@
+Test-induced Priming DRM experiments
+------------------------------------
+
+```{r}
+require(ggplot2)
+require(Crump)
+```
+
+```{r setup, include=FALSE}
+opts_chunk$set(dev = 'png')
+```
+
+```{r}
+Subject<-c()
+Phase<-c()
+Type<-c()
+Memory<-c()
+Confidence<-c()
+CategoryWord<-c()
+for (subnum in 5:55){
+test<-scan(file="RawTurkData.txt", what = "character", sep = " ", skip=(0+subnum), nlines=1)
+data<-unlist(strsplit(test,split=":"))
+if (length(data)==161){
+for(i in 2:161){
+CurrentTrial<-unlist(strsplit(data[i],split=","))
+Phase<-c(Phase,CurrentTrial[4])
+Type<-c(Type,CurrentTrial[3])
+Memory<-c(Memory,CurrentTrial[10])
+Confidence<-c(Confidence,CurrentTrial[11])
+Subject<-c(Subject,subnum)
+CategoryWord<-c(CategoryWord,CurrentTrial[2])
+}
+}
+}
+Memory<-as.numeric(Memory)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence,CategoryWord)
+AllData<-aggregate(Memory~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+aov.out<-aov(Memory~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+```
+
+```{r,Figure1, fig.width=7,fig.height=6}
+AllMeans<-aggregate(Memory~Phase*Type,AllData,mean)
+Allstdes<-aggregate(Memory~Phase*Type,AllData,stde)
+AllGood <- data.frame(AllMeans, stde = Allstdes$Memory)
+limits <- aes(ymax = Memory + stde, ymin = Memory - stde)
+
+ggplot(AllGood,aes(x=Phase, y=Memory, group=Type,fill=Type))+
+  geom_bar(position="dodge",stat="identity")+
+  geom_errorbar(limits,position=position_dodge(.9), width=.3)+
+  theme_classic(base_size=20)+
+  ylab("Proportion Old")+
+  xlab("Testing Phase")+
+  ylim(0,1)+
+  theme(legend.position="top",
+    legend.direction="horizontal",
+    legend.title = element_blank())
+
+```
+
+```{r,eval=FALSE,echo=FALSE}
+
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Confidence~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+aov.out<-aov(Confidence~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+```
+
+```{r,eval=FALSE,echo=FALSE}
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence,CategoryWord)
+IndSubjects<-unique(AllData$Subject)
+Subject<-c()
+RelatedAverage<-c()
+CategoryJudge<-c()
+for (i in IndSubjects){
+  tempSubdata<-AllData[AllData$Subject==i,]
+  PreOnly<-tempSubdata[tempSubdata$Phase=="Pre-Lure",]
+  PreOnly<-PreOnly[PreOnly$Type=="Related",]
+  PreMemory<-aggregate(Memory~CategoryWord,PreOnly,mean)
+  PostOnly<-tempSubdata[tempSubdata$Phase=="Post-Lure",]
+  PostOnly<-PostOnly[PostOnly$Type=="Category",]
+  for(j in PreMemory$CategoryWord){
+    Subject<-c(Subject,i)
+    RelatedAverage<-c(RelatedAverage,PreMemory[PreMemory$CategoryWord==j,]$Memory)
+    CategoryJudge<-c(CategoryJudge,PostOnly[PostOnly$CategoryWord==j,]$Memory)
+  }
+}
+newDF<-data.frame(Subject,RelatedAverage,CategoryJudge)
+AllData<-aggregate(RelatedAverage~Subject*CategoryJudge,newDF,mean)
+AllData$Subject<-factor(AllData$Subject)
+AllData$CategoryJudge<-factor(AllData$CategoryJudge)
+aov.out<-aov(RelatedAverage~CategoryJudge + Error(Subject/CategoryJudge),AllData)
+```
+
+E2 1 second
+-----------
+
+```{r}
+Subject<-c()
+Phase<-c()
+Type<-c()
+Memory<-c()
+Confidence<-c()
+for (subnum in 56:105){
+  test<-scan(file="RawTurkData.txt", what = "character", sep = " ", skip=(0+subnum), nlines=1)
+  data<-unlist(strsplit(test,split=":"))
+if (length(data)==161){
+for(i in 2:161){
+      CurrentTrial<-unlist(strsplit(data[i],split=","))
+      Phase<-c(Phase,CurrentTrial[4])
+      Type<-c(Type,CurrentTrial[3])
+      Memory<-c(Memory,CurrentTrial[10])
+      Confidence<-c(Confidence,CurrentTrial[11])
+      Subject<-c(Subject,subnum)
+    }
+  }
+}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Memory~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+aov.out<-aov(Memory~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+
+```
+
+```{r,Figure2,fig.width=7,fig.height=6}
+AllMeans<-aggregate(Memory~Phase*Type,AllData,mean)
+Allstdes<-aggregate(Memory~Phase*Type,AllData,stde)
+AllGood <- data.frame(AllMeans, stde = Allstdes$Memory)
+limits <- aes(ymax = Memory + stde, ymin = Memory - stde)
+
+ggplot(AllGood,aes(x=Phase, y=Memory, group=Type,fill=Type))+
+  geom_bar(position="dodge",stat="identity")+
+  geom_errorbar(limits,position=position_dodge(.9), width=.3)+
+  theme_classic(base_size=20)+
+  ylab("Proportion Old")+
+  xlab("Testing Phase")+
+  ylim(0,1)+
+  theme(legend.position="top",
+    legend.direction="horizontal",
+    legend.title = element_blank())
+```
+
+```{r,eval=FALSE,echo=FALSE}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Confidence~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+aov.out<-aov(Confidence~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+```
+
+E3 1 second with warning
+------------------------
+
+```{r}
+
+Subject<-c()
+Phase<-c()
+Type<-c()
+Memory<-c()
+Confidence<-c()
+for (subnum in 106:155){
+  test<-scan(file="RawTurkData.txt", what = "character", sep = " ", skip=(0+subnum), nlines=1)
+  data<-unlist(strsplit(test,split=":"))
+if (length(data)==161){
+for(i in 2:161){
+      CurrentTrial<-unlist(strsplit(data[i],split=","))
+      Phase<-c(Phase,CurrentTrial[4])
+      Type<-c(Type,CurrentTrial[3])
+      Memory<-c(Memory,CurrentTrial[10])
+      Confidence<-c(Confidence,CurrentTrial[11])
+      Subject<-c(Subject,subnum)
+    }
+  }
+}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Memory~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+aov.out<-aov(Memory~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+
+```
+
+```{r,Figure3,fig.width=7,fig.height=6, }
+AllMeans<-aggregate(Memory~Phase*Type,AllData,mean)
+Allstdes<-aggregate(Memory~Phase*Type,AllData,stde)
+AllGood <- data.frame(AllMeans, stde = Allstdes$Memory)
+limits <- aes(ymax = Memory + stde, ymin = Memory - stde)
+
+ggplot(AllGood,aes(x=Phase, y=Memory, group=Type,fill=Type))+
+  geom_bar(position="dodge",stat="identity")+
+  geom_errorbar(limits,position=position_dodge(.9), width=.3)+
+  theme_classic(base_size=20)+
+  ylab("Proportion Old")+
+  xlab("Testing Phase")+
+  ylim(0,1)+
+  theme(legend.position="top",
+    legend.direction="horizontal",
+    legend.title = element_blank())
+```
+
+```{r,eval=FALSE,echo=FALSE}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Confidence~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+aov.out<-aov(Confidence~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+```
+
+E4 1 second with warning with control words
+--------------------------------------------
+
+
+```{r}
+Subject<-c()
+Phase<-c()
+Type<-c()
+Memory<-c()
+Confidence<-c()
+for (subnum in 156:204){
+  test<-scan(file="RawTurkData.txt", what = "character", sep = " ", skip=(0+subnum), nlines=1)
+  data<-unlist(strsplit(test,split=":"))
+if (length(data)==161){
+for(i in 2:161){
+      CurrentTrial<-unlist(strsplit(data[i],split=","))
+      Phase<-c(Phase,CurrentTrial[4])
+      Type<-c(Type,CurrentTrial[3])
+      Memory<-c(Memory,CurrentTrial[10])
+      Confidence<-c(Confidence,CurrentTrial[11])
+      Subject<-c(Subject,subnum)
+    }
+  }
+}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Memory~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+AllData<-AllData[AllData$Phase=="Post-Lure",]
+aov.out<-aov(Memory~Type + Error(Subject/(Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+```
+
+```{r,Figure4,fig.width=7,fig.height=6, }
+AllMeans<-aggregate(Memory~Type,AllData,mean)
+Allstdes<-aggregate(Memory~Type,AllData,stde)
+AllGood <- data.frame(AllMeans, stde = Allstdes$Memory)
+limits <- aes(ymax = Memory + stde, ymin = Memory - stde)
+
+ggplot(AllGood,aes(x=Type, y=Memory, group=Type,fill=Type))+
+  geom_bar(position="dodge",stat="identity")+
+  geom_errorbar(limits,position=position_dodge(.9), width=.3)+
+  theme_classic(base_size=20)+
+  ylab("Proportion Old")+
+  xlab("Post-Lure Testing Phase")+
+  ylim(0,1)+
+  theme(legend.position="top",
+    legend.direction="horizontal",
+    legend.title = element_blank())
+```
+
+```{r,eval=FALSE,echo=FALSE}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Confidence~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+AllData<-AllData[AllData$Phase=="Post-Lure",]
+aov.out<-aov(Confidence~Type + Error(Subject/(Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+```
+
+E5 1 second with warning with control words, and RP words
+--------------------------------------------
+
+```{r}
+Subject<-c()
+Phase<-c()
+Type<-c()
+Memory<-c()
+Confidence<-c()
+for (subnum in 206:255){
+  test<-scan(file="RawTurkData.txt", what = "character", sep = " ", skip=(0+subnum), nlines=1)
+  data<-unlist(strsplit(test,split=":"))
+if (length(data)==161){
+for(i in 2:161){
+      CurrentTrial<-unlist(strsplit(data[i],split=","))
+      Phase<-c(Phase,CurrentTrial[4])
+      Type<-c(Type,CurrentTrial[3])
+      Memory<-c(Memory,CurrentTrial[10])
+      Confidence<-c(Confidence,CurrentTrial[11])
+      Subject<-c(Subject,subnum)
+    }
+  }
+}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Memory~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+#AllData<-AllData[AllData$Phase=="Post-Lure",]
+aov.out<-aov(Memory~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+```
+
+```{r,Figure5,fig.width=7,fig.height=6, }
+AllMeans<-aggregate(Memory~Phase*Type,AllData,mean)
+Allstdes<-aggregate(Memory~Phase*Type,AllData,stde)
+AllGood <- data.frame(AllMeans, stde = Allstdes$Memory)
+limits <- aes(ymax = Memory + stde, ymin = Memory - stde)
+
+ggplot(AllGood,aes(x=Phase, y=Memory, group=Type,fill=Type))+
+  geom_bar(position="dodge",stat="identity")+
+  geom_errorbar(limits,position=position_dodge(.9), width=.3)+
+  theme_classic(base_size=20)+
+  ylab("Proportion Old")+
+  xlab("Testing Phase")+
+  ylim(0,1)+
+  theme(legend.position="top",
+    legend.direction="horizontal",
+    legend.title = element_blank())
+
+```
+
+```{r,eval=FALSE,echo=FALSE}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Confidence~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+#AllData<-AllData[AllData$Phase=="Post-Lure",]
+aov.out<-aov(Confidence~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+
+```
+
+
+
+# E6 1 second with warning with control words presented twice
+
+```{r}
+Subject<-c()
+Phase<-c()
+Type<-c()
+Memory<-c()
+Confidence<-c()
+for (subnum in 256:321){
+  test<-scan(file="RawTurkData.txt", what = "character", sep = " ", skip=(0+subnum), nlines=1)
+  data<-unlist(strsplit(test,split=":"))
+ if (length(data)==161){
+for(i in 2:161){
+      CurrentTrial<-unlist(strsplit(data[i],split=","))
+      Phase<-c(Phase,CurrentTrial[4])
+      Type<-c(Type,CurrentTrial[3])
+      Memory<-c(Memory,CurrentTrial[11])
+      Confidence<-c(Confidence,CurrentTrial[12])
+      Subject<-c(Subject,subnum)
+    }
+  }
+}
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Memory~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+#AllData<-AllData[AllData$Phase=="Post-Lure",]
+#aov.out<-aov(Memory~Type + Error(Subject/(Type)),AllData)
+#print(summary(aov.out),digits=10)
+#print(model.tables(aov.out,"means"),digits=3) 
+```
+
+```{r,Figure6,fig.width=7,fig.height=6, }
+AllMeans<-aggregate(Memory~Phase*Type,AllData,mean)
+Allstdes<-aggregate(Memory~Phase*Type,AllData,stde)
+AllGood <- data.frame(AllMeans, stde = Allstdes$Memory)
+limits <- aes(ymax = Memory + stde, ymin = Memory - stde)
+
+ggplot(AllGood,aes(x=Phase, y=Memory, group=Type,fill=Type))+
+  geom_bar(position="dodge",stat="identity")+
+  geom_errorbar(limits,position=position_dodge(.9), width=.3)+
+  theme_classic(base_size=20)+
+  ylab("Proportion Old")+
+  xlab("Testing Phase")+
+  ylim(0,1)+
+  theme(legend.position="right",
+    legend.direction="vertical",
+    legend.title = element_blank())
+
+```
+
+```{r,eval=FALSE,echo=FALSE}
+t.test(AllData[AllData$Type=="NRelated",]$Memory,AllData[AllData$Type=="NSCategory",]$Memory,paired=TRUE)
+t.test(AllData[AllData$Type=="SCategory",]$Memory,AllData[AllData$Type=="UPCategory",]$Memory,paired=TRUE)
+
+Memory<-as.numeric(Memory)
+Confidence<-as.numeric(Confidence)
+AllData<-data.frame(Subject,Phase,Type,Memory,Confidence)
+AllData<-aggregate(Confidence~Subject*Phase*Type,AllData,mean)
+AllData$Subject<-factor(AllData$Subject)
+#AllData<-AllData[AllData$Phase=="Post-Lure",]
+aov.out<-aov(Confidence~Phase*Type + Error(Subject/(Phase+Type)),AllData)
+print(summary(aov.out),digits=10)
+print(model.tables(aov.out,"means"),digits=3) 
+```

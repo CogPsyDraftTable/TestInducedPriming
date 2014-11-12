@@ -1,0 +1,289 @@
+<html>
+<head>
+<link rel="stylesheet" href="DRM.css" type="text/css" charset="utf-8"/>
+
+<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="Stimlist.js"></script>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+
+   // Check if the worker is PREVIEWING the HIT or if they've ACCEPTED the HIT
+    //
+    if (window.opener.previewit == 1)
+    {
+ 	$("#previewMode").show();
+    } else {
+    $("#previewMode").hide();
+    window.opener.endofExp();
+    }
+
+//defining starting attributes 
+buttonsWork=0;
+$("#FirstInstr").hide(); 
+$("#WordStim").hide ();
+$("#StrEnc").hide ();
+$("#StrTst").hide ();
+$("#probablynew").hide ();
+$("#surenew").hide ();
+$("#probablyold").hide();
+$("#sureold").hide(); 
+$("#TestInst").hide();
+$("#WarningInst").hide(); 
+$("#Ending").hide (); 
+$("#Demographics").show();
+$("#ShowInstructions").hide();
+$("#Tnumdisp").hide();
+$("#ExpComplete").hide();
+
+EncodingWordCounter=-1;
+var flipstate=0;
+var warningState=0;
+
+mydata=[[]]; 
+
+//Complete Demographics
+	$("#trial").click(function(){
+	  	deminfo = $("#Country").val() + "," + $("#Sex:checked").val() + "," +
+  			$("#Age:checked").val() + "," + $("#Hand:checked").val() + "," +
+  		$("#Vision:checked").val() + "," + $("#English:checked").val();
+  		$("#Demographics").hide();
+		$("#FirstInstr").show(); 
+		$("#StrEnc").show ();
+		$("#trial").hide();
+		
+	});
+
+
+$("#StrEnc").click(function(){
+	$("#WordStim").show();
+	$("#FirstInstr").hide();
+	$("#StrEnc").hide();
+	StartEncoding();
+});
+
+
+//start the encoding phase 
+    function StartEncoding(){
+    	if (EncodingWordCounter<80){
+    		if (flipstate==0){
+    		EncodingWordCounter++;
+    		$("#WordStim").html(EncodingWords[EncodingWordCounter]);
+    		setTimeout(StartEncoding,1000);
+    		flipstate=1;
+    		}else if (flipstate==1) {
+    		$("#WordStim").html("_______");
+    		setTimeout(StartEncoding,50);
+    		flipstate=0;
+    		}
+    	}else{
+    	$("#WordStim").hide();
+		$("#TestInst").show(); 
+		$("#StrTst").show();
+		}			
+    }
+
+
+
+//first time
+	//Code for starting the testing phase
+$("#StrTst").click(function(){
+	if (warningState==0) {
+	$("#TestInst").hide();
+	$("#WarningInst").show();
+	warningState=1;
+	} else {
+	buttonsWork=1;
+	$("#TestInst").hide(); 
+	$("#WarningInst").hide();
+	$("#WordStim").show();
+	$("#StrTst").hide();
+	$("#sureold").show();
+	$("#probablyold").show();
+	$("#probablynew").show();
+    $("#surenew").show();  	
+    $("#ShowInstructions").show();
+	$("#Tnumdisp").show();
+	StartTest();
+	}
+});
+//**********************the first word in testarray is neither appearing as the first presented stimulus nor containing the full data 
+//**********************can't figure out why that is 
+	TestWordCounter7=-1;
+	function StartTest(){
+		if (TestWordCounter7<List.length-1){
+			TestWordCounter7++
+			$("#Tnumdisp").html("Trials: " + TestWordCounter7 + " of 160 completed");
+			$("#WordStim").html(List[TestWordCounter7][0]);
+			
+			d=new Date(); 
+			OnsetTime=d.getTime();
+			mydata[TestWordCounter7]=List[TestWordCounter7].concat();
+			mydata[TestWordCounter7].push(OnsetTime)
+		} else {
+		$("#WordStim").hide();
+		$("#Ending").show ();
+		$("#ExpComplete").show() 
+		$("#sureold").hide ();
+		$("#surenew").hide ();
+		$("#probablynew").hide();
+		$("#probablyold").hide(); 
+		buttonsWork=0; 
+		}	
+	}
+	//concat is way to make sure they won't be equal where changes in one
+	//will change the other 
+	
+	//code for collecting responses
+$("#sureold").click(function(){
+	if (buttonsWork==1) {
+	d=new Date(); 
+	RTime=d.getTime();
+	mydata[TestWordCounter7].push(RTime,"old","4",1,1);
+	getData();
+	StartTest(); 
+	}
+});
+
+
+$("#probablyold").click(function(){
+	if (buttonsWork==1){
+	d=new Date(); 
+	RTime=d.getTime();
+	mydata[TestWordCounter7].push(RTime,"old","3",1,0) 
+	getData();
+	StartTest(); 
+	}
+});
+
+$("#probablynew").click(function(){
+	if (buttonsWork==1){
+	d=new Date(); 
+	RTime=d.getTime();
+	mydata[TestWordCounter7].push(RTime,"new","2",0,0) 
+	getData();
+	StartTest(); 
+	}
+});
+
+$("#surenew").click(function(){
+	if (buttonsWork==1){
+	d=new Date(); 
+	RTime=d.getTime();
+	mydata[TestWordCounter7].push(RTime,"new", "1",0,1) 
+	getData();
+	StartTest(); 
+	}
+});
+  	
+  	function getData(){
+  	$("#RTs", opener.window.document).val(deminfo + ":" + mydata.join(":"));
+  	}
+
+$("#ExpComplete").click(function(){
+ 	window.opener.endofExp();
+  	getData();
+  	window.close();
+});
+
+}); 
+
+	function basicPopup2(url) {
+		popupWindow2 = window.open(url,'popUpWindow2','height= 300,width=400,\
+		left=100,top=100,resizable=yes,scrollbars=yes,toolbar=no,\
+		menubar=no,location=no,directories=no,status=no');
+	}
+
+
+
+
+
+	
+</script>
+</head>
+
+<body>
+<button id="ShowInstructions" onclick="basicPopup2('DRMInstructions.htm');return false">Show Instructions</button>
+<p id="Tnumdisp"></p>
+<p id="previewMode" align="center"> You are in preview mode. To complete the hit close this window and accept hit before continuing</p>
+
+
+<div id="section1">
+<p id="FirstInstr"> In this experiment, you will be presented with a series of words.<br><br>
+These words will be presented very quickly in rapid succession. <br><br>
+You will then be tested on how well you remember these words. <br><br>
+Get Ready to PAY ATTENTION TO THE WORDS. <br><br>
+Press continue when you are ready to begin.    
+<p id="TestInst">You will now be presented one word at a time. <br>
+Your task is to determine whether the word was shown during the previous phase. <br><br>
+You will have four choices <br><br>
+I'm sure this word was OLD <br>
+I'm guessing this word was OLD<br>
+I'm guessing this word is NEW <br>
+I'm sure this word is NEW <br> <br>
+An OLD response means you think the word did occur in the first phase. <br>
+A NEW response means you think the word did not occur. <br><br>
+</p> 
+<p id="WarningInst">IMPORTANT WARNING <br>
+Many of the words you are about to see are NEW words <br><br>
+They were not shown to you previously <br><br>
+ <br>
+Keep this in mind as you judge whether you remember the word<br>
+<br>
+</p> 
+
+<p id="WordStim"></p>
+<p id="Ending">You have completed the experiment. Thank you for your participation.</p>
+<button id="ExpComplete">Click to continue</button> 
+<button id="StrEnc">Continue </button>
+<button id="StrTst">Continue</button>
+<button id="sureold">I'm sure this word was OLD</button>
+</br>
+<button id="probablyold">I'm guessing this word was OLD</button>
+</br>
+<button id="probablynew">I'm guessing this word is NEW</button>
+</br>
+<button id="surenew">I'm sure this word is NEW</button>
+
+<div id="Demographics" style="text-align:center">
+<p>As a part of the research we are collecting general demographic information. </p>
+<p>You are not required to complete these questions. </p>
+<p>However, doing so will help us better understand our results.</p>
+<p>1. Country
+<input id="Country" type="text"> </p>
+<p>2.
+<input id="Sex" type="radio" name="SexGroup" value="Male"> Male
+<input id="Sex" type="radio" name="SexGroup" value="Female"> Female</p>
+<p>3.  Age Range</p>
+<input id="Age" type="radio" name="AgeGroup" value="20"> < 20
+<input id="Age" type="radio" name="AgeGroup" value="25"> 20 - 25
+<input id="Age" type="radio" name="AgeGroup" value="30"> 26 - 30
+<input id="Age" type="radio" name="AgeGroup" value="35"> 31 - 35
+<input id="Age" type="radio" name="AgeGroup" value="40"> 36 - 40<br>
+<input id="Age" type="radio" name="AgeGroup" value="45"> 41 - 45
+<input id="Age" type="radio" name="AgeGroup" value="50"> 46 - 50
+<input id="Age" type="radio" name="AgeGroup" value="55"> 51 - 55
+<input id="Age" type="radio" name="AgeGroup" value="60"> 56 - 60
+<input id="Age" type="radio" name="AgeGroup" value="65"> 61 - 65
+<input id="Age" type="radio" name="AgeGroup" value="70"> 66 and above<br>
+<p>4. Handedness</p>
+<input id="Hand" type="radio" name="HandGroup" value="Right"> Right
+<input id="Hand" type="radio" name="HandGroup" value="Left"> Left
+<input id="Hand" type="radio" name="HandGroup" value="Both"> Both
+<p>5. Vision</p>
+<input id="Vision" type="radio" name="VisionGroup" value="Normal"> Normal eyesight without needing glasses<br>
+<input id="Vision" type="radio" name="VisionGroup" value="Corrected"> Corrected Vision (wear glasses)<br>
+<input id="Vision" type="radio" name="VisionGroup" value="problems"> Poor eyesight and do not wear glasses<br>
+<p>6. English Ability</p>
+<input id="English" type="radio" name="EnglishGroup" value="First"> First-language speaker<br>
+<input id="English" type="radio" name="EnglishGroup" value="Second"> Second-language speaker<br>
+<input id="English" type="radio" name="EnglishGroup" value="None"> No English ability<br>
+<button id="trial">Continue</button>
+</div>
+
+
+
+</body>
+</html>
